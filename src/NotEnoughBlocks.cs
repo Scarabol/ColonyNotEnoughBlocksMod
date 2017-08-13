@@ -108,9 +108,11 @@ namespace ScarabolMods
                 foreach (string side in new string[] { "sideall", "sidex+", "sidex-", "sidey+", "sidey-", "sidez+", "sidez-" }) {
                   string key;
                   if (typeEntry.Value.TryGetAs(side, out key)) {
-                    string sidekey = MOD_PREFIX + packageName + "." + key.Substring(0, key.Length-2) + key.Substring(key.Length-2);
-                    Pipliz.Log.Write(string.Format("Rewriting side key from '{0}' to '{1}'", key, sidekey));
-                    typeEntry.Value.SetAs(side, sidekey);
+                    if (!key.Equals("SELF")) {
+                      string sidekey = MOD_PREFIX + packageName + "." + key.Substring(0, key.Length-2) + key.Substring(key.Length-2);
+                      Pipliz.Log.Write(string.Format("Rewriting side key from '{0}' to '{1}'", key, sidekey));
+                      typeEntry.Value.SetAs(side, sidekey);
+                    }
                   }
                 }
                 string realkey = MOD_PREFIX + packageName + "." + typeEntry.Key;
