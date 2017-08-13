@@ -1,0 +1,6 @@
+[
+	{
+		"results":[{"type":"mydirt"}],
+		"requires":[{"type":"planks","amount":2}]
+	}
+]

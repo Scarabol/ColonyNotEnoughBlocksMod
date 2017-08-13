@@ -1,0 +1,8 @@
+{
+  "mydirt" : {
+    "albedo" : "mydirt",
+    "normal" : "neutral",
+    "emissive" : "neutral",
+    "height" : "neutral"
+  }
+}
