@@ -1,6 +1,6 @@
 [
-	{
-		"results":[{"type":"mydirt"}],
-		"requires":[{"type":"planks","amount":2}]
-	}
+  {
+    "results":[{"type":"mydirt"}],
+    "requires":[{"type":"planks","amount":2}]
+  }
 ]

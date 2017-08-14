@@ -39,10 +39,10 @@ namespace ScarabolMods
     [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterAddingBaseTypes, "scarabol.notenoughblocks.addrawtypes")]
     public static void AfterAddingBaseTypes()
     {
-      // TODO this is realy hacky (maybe better in future ModAPI)
       foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
         string packageName = Path.GetFileName(fullDirPath);
         Pipliz.Log.Write(string.Format("Loading blocks from package {0}", packageName));
+        // TODO this is realy hacky (maybe better in future ModAPI)
         string relativeTexturesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri(new Uri(MultiPath.Combine(BlocksDirectory, packageName, "textures"))).OriginalString;
         Pipliz.Log.Write(string.Format("relative textures path is {0}", relativeTexturesPath));
         string relativeMeshesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "meshes", "dummyfile")).MakeRelativeUri(new Uri(MultiPath.Combine(BlocksDirectory, packageName, "meshes"))).OriginalString;
@@ -144,8 +144,11 @@ namespace ScarabolMods
                 JSONNode jsonResults = craftingEntry.GetAs<JSONNode>("results");
                 foreach (JSONNode jsonResult in jsonResults.LoopArray()) {
                   string type = jsonResult.GetAs<string>("type");
-                  string realtype = MOD_PREFIX + packageName + "." + type;
-                  Pipliz.Log.Write(string.Format("Rewriting block recipe result type from '{0}' to '{1}'", type, realtype));
+                  string realtype = type;
+                  if (type.StartsWith("vanilla")) {
+                    realtype = MOD_PREFIX + packageName + "." + type;
+                    Pipliz.Log.Write(string.Format("Rewriting block recipe result type from '{0}' to '{1}'", type, realtype));
+                  }
                   jsonResult.SetAs("type", realtype);
                 }
                 RecipePlayer.AllRecipes.Add(new Recipe(craftingEntry));

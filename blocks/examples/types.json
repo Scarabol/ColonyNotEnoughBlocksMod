@@ -1,11 +1,11 @@
 {
   "mydirt" : {
-		"npcLimit" : 0,
-		"isFertile" : true,
+    "npcLimit" : 0,
+    "isFertile" : true,
     "icon" : "mydirt.png",
     "sideall" : "mydirt",
-		"onRemoveAudio" : "grassDelete",
-		"onPlaceAudio" : "dirtPlace",
+    "onRemoveAudio" : "grassDelete",
+    "onPlaceAudio" : "dirtPlace",
     "maxStackSize" : 10
   }
 }
