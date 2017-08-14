@@ -109,7 +109,7 @@ namespace ScarabolMods
                 string parentType;
                 if (typeEntry.Value.TryGetAs("parentType", out parentType)) {
                   string realParentType;
-                  if (mesh.StartsWith(VANILLA_PREFIX)) {
+                  if (parentType.StartsWith(VANILLA_PREFIX)) {
                     realParentType = mesh.Substring(VANILLA_PREFIX.Length);
                   } else {
                     realParentType = MOD_PREFIX + packageName + "." + parentType;
@@ -149,6 +149,7 @@ namespace ScarabolMods
                 Pipliz.Log.Write(string.Format("Adding block type '{0}'", realkey));
                 ItemTypes.AddRawType(realkey, typeEntry.Value);
               } catch (Exception exception) {
+                Pipliz.Log.WriteException(exception);
                 Pipliz.Log.WriteError(string.Format("Exception while loading block type {0}; {1}", typeEntry.Key, exception.Message));
               }
             }
