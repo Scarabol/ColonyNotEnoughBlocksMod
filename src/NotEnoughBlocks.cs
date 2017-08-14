@@ -15,6 +15,7 @@ namespace ScarabolMods
   public static class NotEnoughBlocksModEntries
   {
     private static string MOD_PREFIX = "mods.scarabol.notenoughblocks.";
+    private static string VANILLA_PREFIX = "vanilla.";
     public static string ModDirectory;
     private static string BlocksDirectory;
 
@@ -57,7 +58,11 @@ namespace ScarabolMods
                   string textureTypeValue = textureEntry.Value.GetAs<string>(textureType);
                   string realTextureTypeValue = textureTypeValue;
                   if (!textureTypeValue.Equals("neutral")) {
-                    realTextureTypeValue = MultiPath.Combine(relativeTexturesPath, textureType, textureTypeValue);
+                    if (textureTypeValue.StartsWith(VANILLA_PREFIX)) {
+                      realTextureTypeValue = realTextureTypeValue.Substring(VANILLA_PREFIX.Length);
+                    } else {
+                      realTextureTypeValue = MultiPath.Combine(relativeTexturesPath, textureType, textureTypeValue);
+                    }
                   }
                   Pipliz.Log.Write(string.Format("Rewriting {0} texture path from '{1}' to '{2}'", textureType, textureTypeValue, realTextureTypeValue));
                   textureEntry.Value.SetAs(textureType, realTextureTypeValue);
@@ -81,26 +86,46 @@ namespace ScarabolMods
               try {
                 string icon;
                 if (typeEntry.Value.TryGetAs("icon", out icon)) {
-                  string realicon = MultiPath.Combine(BlocksDirectory, packageName, "icons", icon);
+                  string realicon;
+                  if (icon.StartsWith(VANILLA_PREFIX)) {
+                    realicon = icon.Substring(VANILLA_PREFIX.Length);
+                  } else {
+                    realicon = MultiPath.Combine(BlocksDirectory, packageName, "icons", icon);
+                  }
                   Pipliz.Log.Write(string.Format("Rewriting icon path from '{0}' to '{1}'", icon, realicon));
                   typeEntry.Value.SetAs("icon", realicon);
                 }
                 string mesh;
                 if (typeEntry.Value.TryGetAs("mesh", out mesh)) {
-                  string realmesh = Path.Combine(relativeMeshesPath, mesh);
+                  string realmesh;
+                  if (mesh.StartsWith(VANILLA_PREFIX)) {
+                    realmesh = icon.Substring(VANILLA_PREFIX.Length);
+                  } else {
+                    realmesh = Path.Combine(relativeMeshesPath, mesh);
+                  }
                   Pipliz.Log.Write(string.Format("Rewriting mesh path from '{0}' to '{1}'", mesh, realmesh));
                   typeEntry.Value.SetAs("mesh", realmesh);
                 }
                 string parentType;
                 if (typeEntry.Value.TryGetAs("parentType", out parentType)) {
-                  string realParentType = MOD_PREFIX + packageName + "." + parentType;
+                  string realParentType;
+                  if (mesh.StartsWith(VANILLA_PREFIX)) {
+                    realParentType = mesh.Substring(VANILLA_PREFIX.Length);
+                  } else {
+                    realParentType = MOD_PREFIX + packageName + "." + parentType;
+                  }
                   Pipliz.Log.Write(string.Format("Rewriting parentType from '{0}' to '{1}'", parentType, realParentType));
                   typeEntry.Value.SetAs("parentType", realParentType);
                 }
                 foreach (string rotatable in new string[] { "rotatablex+", "rotatablex-", "rotatablez+", "rotatablez-" }) {
                   string key;
                   if (typeEntry.Value.TryGetAs(rotatable, out key)) {
-                    string rotatablekey = MOD_PREFIX + packageName + "." + key.Substring(0, key.Length-2) + key.Substring(key.Length-2);
+                    string rotatablekey;
+                    if (key.StartsWith(VANILLA_PREFIX)) {
+                      rotatablekey = key.Substring(VANILLA_PREFIX.Length);
+                    } else {
+                      rotatablekey = MOD_PREFIX + packageName + "." + key.Substring(0, key.Length-2) + key.Substring(key.Length-2);
+                    }
                     Pipliz.Log.Write(string.Format("Rewriting rotatable key '{0}' to '{1}'", key, rotatablekey));
                     typeEntry.Value.SetAs(rotatable, rotatablekey);
                   }
@@ -109,7 +134,12 @@ namespace ScarabolMods
                   string key;
                   if (typeEntry.Value.TryGetAs(side, out key)) {
                     if (!key.Equals("SELF")) {
-                      string sidekey = MOD_PREFIX + packageName + "." + key.Substring(0, key.Length-2) + key.Substring(key.Length-2);
+                      string sidekey;
+                      if (key.StartsWith(VANILLA_PREFIX)) {
+                        sidekey = key.Substring(VANILLA_PREFIX.Length);
+                      } else {
+                        sidekey = MOD_PREFIX + packageName + "." + key.Substring(0, key.Length-2) + key.Substring(key.Length-2);
+                      }
                       Pipliz.Log.Write(string.Format("Rewriting side key from '{0}' to '{1}'", key, sidekey));
                       typeEntry.Value.SetAs(side, sidekey);
                     }
@@ -141,15 +171,19 @@ namespace ScarabolMods
           if (Pipliz.JSON.JSON.Deserialize(MultiPath.Combine(BlocksDirectory, packageName, "crafting.json"), out jsonCrafting, false)) {
             if (jsonCrafting.NodeType == NodeType.Array) {
               foreach (JSONNode craftingEntry in jsonCrafting.LoopArray()) {
-                JSONNode jsonResults = craftingEntry.GetAs<JSONNode>("results");
-                foreach (JSONNode jsonResult in jsonResults.LoopArray()) {
-                  string type = jsonResult.GetAs<string>("type");
-                  string realtype = type;
-                  if (type.StartsWith("vanilla")) {
-                    realtype = MOD_PREFIX + packageName + "." + type;
-                    Pipliz.Log.Write(string.Format("Rewriting block recipe result type from '{0}' to '{1}'", type, realtype));
+                foreach (string recipePart in new string[] { "results", "requires" }) {
+                  JSONNode jsonRecipeParts = craftingEntry.GetAs<JSONNode>(recipePart);
+                  foreach (JSONNode jsonRecipePart in jsonRecipeParts.LoopArray()) {
+                    string type = jsonRecipePart.GetAs<string>("type");
+                    string realtype;
+                    if (type.StartsWith(VANILLA_PREFIX)) {
+                      realtype = type.Substring(VANILLA_PREFIX.Length);
+                    } else {
+                      realtype = MOD_PREFIX + packageName + "." + type;
+                    }
+                    Pipliz.Log.Write(string.Format("Rewriting block recipe type from '{0}' to '{1}'", type, realtype));
+                    jsonRecipePart.SetAs("type", realtype);
                   }
-                  jsonResult.SetAs("type", realtype);
                 }
                 RecipePlayer.AllRecipes.Add(new Recipe(craftingEntry));
               }

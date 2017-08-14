@@ -7,5 +7,13 @@
     "onRemoveAudio" : "grassDelete",
     "onPlaceAudio" : "dirtPlace",
     "maxStackSize" : 10
+  },
+  "mystone" : {
+    "npcLimit" : 0,
+    "icon" : "vanilla.stonebricks.png",
+    "sideall" : "SELF",
+    "onRemoveAudio" : "stonePlace",
+    "onPlaceAudio" : "stoneDelete",
+    "maxStackSize" : 20
   }
 }

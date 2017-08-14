@@ -1,6 +1,14 @@
 [
   {
     "results":[{"type":"mydirt"}],
-    "requires":[{"type":"planks","amount":2}]
+    "requires":[{"type":"vanilla.planks","amount":2}]
+  },
+  {
+    "results":[{"type":"vanilla.stonebricks"}],
+    "requires":[{"type":"mydirt","amount":2}]
+  },
+  {
+    "results":[{"type":"mystone"}],
+    "requires":[{"type":"vanilla.stonebricks","amount":1}]
   }
 ]

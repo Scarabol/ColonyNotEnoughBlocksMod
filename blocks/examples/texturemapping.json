@@ -4,5 +4,11 @@
     "normal" : "neutral",
     "emissive" : "neutral",
     "height" : "neutral"
+  },
+  "mystone" : {
+    "albedo" : "vanilla.stoneblock",
+    "normal" : "vanilla.stoneblock",
+    "emissive" : "neutral",
+    "height" : "vanilla.stoneblock"
   }
 }
