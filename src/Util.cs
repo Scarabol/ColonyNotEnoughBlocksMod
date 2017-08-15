@@ -16,7 +16,7 @@ namespace ScarabolMods
     public static void localize(string localePath, string keyprefix, bool verbose)
     {
       try {
-        foreach (string locFileName in new string[] { "types.json", "typeuses.json" }) {
+        foreach (string locFileName in new string[] { "types.json", "typeuses.json", "localization.json" }) {
           string[] files = Directory.GetFiles(localePath, locFileName, SearchOption.AllDirectories);
           foreach (string filepath in files) {
             try {

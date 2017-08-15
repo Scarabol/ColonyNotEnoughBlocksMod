@@ -186,7 +186,9 @@ namespace ScarabolMods
                     jsonRecipePart.SetAs("type", realtype);
                   }
                 }
-                RecipePlayer.AllRecipes.Add(new Recipe(craftingEntry));
+                Recipe craftingRecipe = new Recipe(craftingEntry);
+                RecipePlayer.AllRecipes.Add(craftingRecipe);
+                RecipeManager.AddRecipes("pipliz.crafter", new List<Recipe>() { craftingRecipe });
               }
             } else {
               Pipliz.Log.WriteError(string.Format("Expected json array in {0}, but got {1} instead", "crafting.json", jsonCrafting.NodeType));
