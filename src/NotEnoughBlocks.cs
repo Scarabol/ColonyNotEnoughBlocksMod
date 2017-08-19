@@ -195,7 +195,9 @@ namespace ScarabolMods
                     }
                   }
                   Recipe craftingRecipe = new Recipe(craftingEntry);
-                  RecipePlayer.AllRecipes.Add(craftingRecipe);
+                  if (jobAndFilename[1].Equals("crafting.json")) {
+                    RecipePlayer.AllRecipes.Add(craftingRecipe);
+                  }
                   RecipeManager.AddRecipes(jobAndFilename[0], new List<Recipe>() { craftingRecipe });
                 }
               } else {
