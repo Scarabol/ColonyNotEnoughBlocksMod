@@ -168,34 +168,43 @@ namespace ScarabolMods
         string packageName = Path.GetFileName(fullDirPath);
         Pipliz.Log.Write(string.Format("Started loading '{0}' recipes...", packageName));
         try {
-          JSONNode jsonCrafting;
-          if (Pipliz.JSON.JSON.Deserialize(MultiPath.Combine(BlocksDirectory, packageName, "crafting.json"), out jsonCrafting, false)) {
-            if (jsonCrafting.NodeType == NodeType.Array) {
-              foreach (JSONNode craftingEntry in jsonCrafting.LoopArray()) {
-                foreach (string recipePart in new string[] { "results", "requires" }) {
-                  JSONNode jsonRecipeParts = craftingEntry.GetAs<JSONNode>(recipePart);
-                  foreach (JSONNode jsonRecipePart in jsonRecipeParts.LoopArray()) {
-                    string type = jsonRecipePart.GetAs<string>("type");
-                    string realtype;
-                    if (type.StartsWith(VANILLA_PREFIX)) {
-                      realtype = type.Substring(VANILLA_PREFIX.Length);
-                    } else {
-                      realtype = MOD_PREFIX + packageName + "." + type;
+          foreach (string[] jobAndFilename in new string[][] { new string[] { "pipliz.crafter", "crafting.json"},
+                                                             new string[] { "pipliz.tailor", "tailoring.json" },
+                                                             new string[] { "pipliz.grinder", "grinding.json" },
+                                                             new string[] { "pipliz.minter", "minting.json" },
+                                                             new string[] { "pipliz.merchant", "shopping.json" },
+                                                             new string[] { "pipliz.technologist", "technologist.json" },
+                                                             new string[] { "pipliz.smelter", "smelting.json" },
+                                                             new string[] { "pipliz.baker", "baking.json" } }) {
+            JSONNode jsonRecipes;
+            if (Pipliz.JSON.JSON.Deserialize(MultiPath.Combine(BlocksDirectory, packageName, jobAndFilename[1]), out jsonRecipes, false)) {
+              if (jsonRecipes.NodeType == NodeType.Array) {
+                foreach (JSONNode craftingEntry in jsonRecipes.LoopArray()) {
+                  foreach (string recipePart in new string[] { "results", "requires" }) {
+                    JSONNode jsonRecipeParts = craftingEntry.GetAs<JSONNode>(recipePart);
+                    foreach (JSONNode jsonRecipePart in jsonRecipeParts.LoopArray()) {
+                      string type = jsonRecipePart.GetAs<string>("type");
+                      string realtype;
+                      if (type.StartsWith(VANILLA_PREFIX)) {
+                        realtype = type.Substring(VANILLA_PREFIX.Length);
+                      } else {
+                        realtype = MOD_PREFIX + packageName + "." + type;
+                      }
+                      Pipliz.Log.Write(string.Format("Rewriting block recipe type from '{0}' to '{1}'", type, realtype));
+                      jsonRecipePart.SetAs("type", realtype);
                     }
-                    Pipliz.Log.Write(string.Format("Rewriting block recipe type from '{0}' to '{1}'", type, realtype));
-                    jsonRecipePart.SetAs("type", realtype);
                   }
+                  Recipe craftingRecipe = new Recipe(craftingEntry);
+                  RecipePlayer.AllRecipes.Add(craftingRecipe);
+                  RecipeManager.AddRecipes(jobAndFilename[0], new List<Recipe>() { craftingRecipe });
                 }
-                Recipe craftingRecipe = new Recipe(craftingEntry);
-                RecipePlayer.AllRecipes.Add(craftingRecipe);
-                RecipeManager.AddRecipes("pipliz.crafter", new List<Recipe>() { craftingRecipe });
+              } else {
+                Pipliz.Log.WriteError(string.Format("Expected json array in {0}, but got {1} instead", jobAndFilename[1], jsonRecipes.NodeType));
               }
-            } else {
-              Pipliz.Log.WriteError(string.Format("Expected json array in {0}, but got {1} instead", "crafting.json", jsonCrafting.NodeType));
             }
           }
         } catch (Exception exception) {
-          Pipliz.Log.WriteError(string.Format("Exception while loading door recipes from {0}; {1}", "crafting.json", exception.Message));
+          Pipliz.Log.WriteError(string.Format("Exception while loading recipes from {0}; {1}", packageName, exception.Message));
         }
       }
     }
