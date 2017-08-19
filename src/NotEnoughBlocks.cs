@@ -194,11 +194,15 @@ namespace ScarabolMods
                       jsonRecipePart.SetAs("type", realtype);
                     }
                   }
-                  Recipe craftingRecipe = new Recipe(craftingEntry);
-                  if (jobAndFilename[1].Equals("crafting.json")) {
-                    RecipePlayer.AllRecipes.Add(craftingRecipe);
+                  if (jobAndFilename[0].Equals("pipliz.smelter") || jobAndFilename[0].Equals("pipliz.baker")) {
+                    RecipeManager.AddRecipesFueled(jobAndFilename[0], new List<RecipeFueled>() { new RecipeFueled(craftingEntry) });
+                  } else {
+                    Recipe craftingRecipe = new Recipe(craftingEntry);
+                    if (jobAndFilename[1].Equals("crafting.json")) {
+                      RecipePlayer.AllRecipes.Add(craftingRecipe);
+                    }
+                    RecipeManager.AddRecipes(jobAndFilename[0], new List<Recipe>() { craftingRecipe });
                   }
-                  RecipeManager.AddRecipes(jobAndFilename[0], new List<Recipe>() { craftingRecipe });
                 }
               } else {
                 Pipliz.Log.WriteError(string.Format("Expected json array in {0}, but got {1} instead", jobAndFilename[1], jsonRecipes.NodeType));
