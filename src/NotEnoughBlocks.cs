@@ -21,6 +21,7 @@ namespace ScarabolMods
     private static string RelativeTexturesPath;
     private static string RelativeIconsPath;
     private static string RelativeMeshesPath;
+    private static List<string> crateTypeKeys = new List<string>();
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.OnAssemblyLoaded, "scarabol.notenoughblocks.assemblyload")]
     public static void OnAssemblyLoaded(string path)
@@ -150,7 +151,13 @@ namespace ScarabolMods
                   }
                 }
                 string realkey = MOD_PREFIX + packageName + "." + typeEntry.Key;
-                Pipliz.Log.Write(string.Format("Adding block type '{0}'", realkey));
+                bool isCrate;
+                if (typeEntry.Value.TryGetAs<bool>("isCrate", out isCrate) && isCrate) {
+                  Pipliz.Log.Write(string.Format("Adding crate type '{0}'", realkey));
+                  crateTypeKeys.Add(realkey);
+                } else {
+                  Pipliz.Log.Write(string.Format("Adding block type '{0}'", realkey));
+                }
                 ItemTypes.AddRawType(realkey, typeEntry.Value);
               } catch (Exception exception) {
                 Pipliz.Log.WriteException(exception);
@@ -216,6 +223,15 @@ namespace ScarabolMods
         } catch (Exception exception) {
           Pipliz.Log.WriteError(string.Format("Exception while loading recipes from {0}; {1}", packageName, exception.Message));
         }
+      }
+    }
+
+    [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterItemTypesServer, "scarabol.notenoughblocks.registertypes")]
+    public static void AfterItemTypesServer()
+    {
+      foreach (string typekey in crateTypeKeys) {
+        ItemTypesServer.RegisterOnAdd(typekey, StockpileBlockTracker.Add);
+        ItemTypesServer.RegisterOnRemove(typekey, StockpileBlockTracker.Remove);
       }
     }
   }

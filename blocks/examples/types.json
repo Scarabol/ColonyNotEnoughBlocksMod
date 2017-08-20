@@ -15,5 +15,13 @@
     "onRemoveAudio" : "stonePlace",
     "onPlaceAudio" : "stoneDelete",
     "maxStackSize" : 20
+  },
+  "mycrate" : {
+		"sideall" : "crate",
+		"icon" : "vanilla.crate.png",
+		"onRemoveAudio" : "woodDeleteLight",
+		"onPlaceAudio" : "woodPlace",
+		"npcLimit" : 0,
+    "isCrate" : true
   }
 }

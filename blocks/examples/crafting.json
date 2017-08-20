@@ -10,5 +10,9 @@
   {
     "results":[{"type":"mystone"}],
     "requires":[{"type":"vanilla.stonebricks","amount":1}]
+  },
+  {
+    "results":[{"type":"mycrate"}],
+    "requires":[{"type":"vanilla.planks","amount":2}]
   }
 ]
