@@ -30,6 +30,9 @@ namespace ScarabolMods
       BlocksDirectory = Path.Combine(ModDirectory, "blocks");
       foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
         string packageName = Path.GetFileName(fullDirPath);
+        if (packageName.Equals("examples")) {
+          continue;
+        }
         Pipliz.Log.Write(string.Format("Loading translations from package {0}", packageName));
         ModLocalizationHelper.localize(MultiPath.Combine(BlocksDirectory, packageName, "localization"), MOD_PREFIX + packageName + ".", false);
       }
@@ -50,6 +53,9 @@ namespace ScarabolMods
     {
       foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
         string packageName = Path.GetFileName(fullDirPath);
+        if (packageName.Equals("examples")) {
+          continue;
+        }
         Pipliz.Log.Write(string.Format("Loading blocks from package {0}", packageName));
         string relativeTexturesPath = MultiPath.Combine(RelativeTexturesPath, packageName, "textures");
         Pipliz.Log.Write(string.Format("relative textures path is {0}", relativeTexturesPath));
@@ -172,11 +178,14 @@ namespace ScarabolMods
     }
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterItemTypesDefined, "scarabol.notenoughblocks.loadrecipes")]
-    [ModLoader.ModCallbackProvidesFor("pipliz.apiprovider.registerrecipes")]
+    [ModLoader.ModCallbackDependsOn("pipliz.apiprovider.registerrecipes")]
     public static void AfterItemTypesDefined()
     {
       foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
         string packageName = Path.GetFileName(fullDirPath);
+        if (packageName.Equals("examples")) {
+          continue;
+        }
         Pipliz.Log.Write(string.Format("Started loading '{0}' recipes...", packageName));
         try {
           foreach (string[] jobAndFilename in new string[][] { new string[] { "pipliz.crafter", "crafting.json"},
