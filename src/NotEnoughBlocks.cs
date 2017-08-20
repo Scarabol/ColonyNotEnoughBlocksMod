@@ -22,6 +22,7 @@ namespace ScarabolMods
     private static string RelativeIconsPath;
     private static string RelativeMeshesPath;
     private static List<string> crateTypeKeys = new List<string>();
+    private static List<Recipe> playerCraftingRecipes = new List<Recipe>();
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.OnAssemblyLoaded, "scarabol.notenoughblocks.assemblyload")]
     public static void OnAssemblyLoaded(string path)
@@ -178,7 +179,8 @@ namespace ScarabolMods
     }
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterItemTypesDefined, "scarabol.notenoughblocks.loadrecipes")]
-    [ModLoader.ModCallbackDependsOn("pipliz.apiprovider.registerrecipes")]
+    [ModLoader.ModCallbackDependsOn("pipliz.blocknpcs.loadrecipes")]
+    [ModLoader.ModCallbackProvidesFor("pipliz.apiprovider.registerrecipes")]
     public static void AfterItemTypesDefined()
     {
       foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
@@ -219,7 +221,7 @@ namespace ScarabolMods
                   } else {
                     Recipe craftingRecipe = new Recipe(craftingEntry);
                     if (jobAndFilename[1].Equals("crafting.json")) {
-                      RecipePlayer.AllRecipes.Add(craftingRecipe);
+                      playerCraftingRecipes.Add(craftingRecipe);
                     }
                     RecipeManager.AddRecipes(jobAndFilename[0], new List<Recipe>() { craftingRecipe });
                   }
@@ -242,6 +244,13 @@ namespace ScarabolMods
         ItemTypesServer.RegisterOnAdd(typekey, StockpileBlockTracker.Add);
         ItemTypesServer.RegisterOnRemove(typekey, StockpileBlockTracker.Remove);
       }
+    }
+
+    [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterWorldLoad, "scarabol.notenoughblocks.addplayercrafts")]
+    public static void AfterWorldLoad()
+    {
+      // add recipes here, otherwise they're inserted before vanilla recipes in player crafts
+      RecipePlayer.AllRecipes.AddRange(playerCraftingRecipes);
     }
   }
 }
