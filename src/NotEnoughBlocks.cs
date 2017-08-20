@@ -129,7 +129,7 @@ namespace ScarabolMods
                     if (key.StartsWith(VANILLA_PREFIX)) {
                       rotatablekey = key.Substring(VANILLA_PREFIX.Length);
                     } else {
-                      rotatablekey = MOD_PREFIX + packageName + "." + key.Substring(0, key.Length-2) + key.Substring(key.Length-2);
+                      rotatablekey = MOD_PREFIX + packageName + "." + key;
                     }
                     Pipliz.Log.Write(string.Format("Rewriting rotatable key '{0}' to '{1}'", key, rotatablekey));
                     typeEntry.Value.SetAs(rotatable, rotatablekey);
@@ -143,7 +143,7 @@ namespace ScarabolMods
                       if (key.StartsWith(VANILLA_PREFIX)) {
                         sidekey = key.Substring(VANILLA_PREFIX.Length);
                       } else {
-                        sidekey = MOD_PREFIX + packageName + "." + key.Substring(0, key.Length-2) + key.Substring(key.Length-2);
+                        sidekey = MOD_PREFIX + packageName + "." + key;
                       }
                       Pipliz.Log.Write(string.Format("Rewriting side key from '{0}' to '{1}'", key, sidekey));
                       typeEntry.Value.SetAs(side, sidekey);
