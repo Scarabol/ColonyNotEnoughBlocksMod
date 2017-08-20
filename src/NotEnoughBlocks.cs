@@ -18,6 +18,9 @@ namespace ScarabolMods
     private static string VANILLA_PREFIX = "vanilla.";
     public static string ModDirectory;
     private static string BlocksDirectory;
+    private static string RelativeTexturesPath;
+    private static string RelativeIconsPath;
+    private static string RelativeMeshesPath;
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.OnAssemblyLoaded, "scarabol.notenoughblocks.assemblyload")]
     public static void OnAssemblyLoaded(string path)
@@ -29,6 +32,10 @@ namespace ScarabolMods
         Pipliz.Log.Write(string.Format("Loading translations from package {0}", packageName));
         ModLocalizationHelper.localize(MultiPath.Combine(BlocksDirectory, packageName, "localization"), MOD_PREFIX + packageName + ".", false);
       }
+      // TODO this is realy hacky (maybe better in future ModAPI)
+      RelativeTexturesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
+      RelativeIconsPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "icons", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
+      RelativeMeshesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "meshes", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
     }
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterStartup, "scarabol.notenoughblocks.registercallbacks")]
@@ -43,11 +50,8 @@ namespace ScarabolMods
       foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
         string packageName = Path.GetFileName(fullDirPath);
         Pipliz.Log.Write(string.Format("Loading blocks from package {0}", packageName));
-        // TODO this is realy hacky (maybe better in future ModAPI)
-        string relativeTexturesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri(new Uri(MultiPath.Combine(BlocksDirectory, packageName, "textures"))).OriginalString;
+        string relativeTexturesPath = MultiPath.Combine(RelativeTexturesPath, packageName, "textures");
         Pipliz.Log.Write(string.Format("relative textures path is {0}", relativeTexturesPath));
-        string relativeMeshesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "meshes", "dummyfile")).MakeRelativeUri(new Uri(MultiPath.Combine(BlocksDirectory, packageName, "meshes"))).OriginalString;
-        Pipliz.Log.Write(string.Format("relative meshes path is {0}", relativeMeshesPath));
         Pipliz.Log.Write(string.Format("Started loading '{0}' texture mappings...", packageName));
         JSONNode jsonTextureMapping;
         if (Pipliz.JSON.JSON.Deserialize(MultiPath.Combine(BlocksDirectory, packageName, "texturemapping.json"), out jsonTextureMapping, false)) {
@@ -90,7 +94,7 @@ namespace ScarabolMods
                   if (icon.StartsWith(VANILLA_PREFIX)) {
                     realicon = icon.Substring(VANILLA_PREFIX.Length);
                   } else {
-                    realicon = MultiPath.Combine(BlocksDirectory, packageName, "icons", icon);
+                    realicon = MultiPath.Combine(RelativeIconsPath, packageName, "icons", icon);
                   }
                   Pipliz.Log.Write(string.Format("Rewriting icon path from '{0}' to '{1}'", icon, realicon));
                   typeEntry.Value.SetAs("icon", realicon);
@@ -101,7 +105,7 @@ namespace ScarabolMods
                   if (mesh.StartsWith(VANILLA_PREFIX)) {
                     realmesh = icon.Substring(VANILLA_PREFIX.Length);
                   } else {
-                    realmesh = Path.Combine(relativeMeshesPath, mesh);
+                    realmesh = MultiPath.Combine(RelativeMeshesPath, packageName, "meshes", mesh);
                   }
                   Pipliz.Log.Write(string.Format("Rewriting mesh path from '{0}' to '{1}'", mesh, realmesh));
                   typeEntry.Value.SetAs("mesh", realmesh);
