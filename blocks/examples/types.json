@@ -6,7 +6,8 @@
     "sideall" : "mydirt",
     "onRemoveAudio" : "grassDelete",
     "onPlaceAudio" : "dirtPlace",
-    "maxStackSize" : 10
+    "maxStackSize" : 10,
+    "onRemoveType" : "mystone"
   },
   "mystone" : {
     "npcLimit" : 0,

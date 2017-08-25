@@ -157,6 +157,17 @@ namespace ScarabolMods
                     }
                   }
                 }
+                string onRemoveType;
+                if (typeEntry.Value.TryGetAs("onRemoveType", out onRemoveType)) {
+                  string realOnRemoveType;
+                  if (onRemoveType.StartsWith(VANILLA_PREFIX)) {
+                    realOnRemoveType = mesh.Substring(VANILLA_PREFIX.Length);
+                  } else {
+                    realOnRemoveType = MOD_PREFIX + packageName + "." + onRemoveType;
+                  }
+                  Pipliz.Log.Write(string.Format("Rewriting onRemoveType from '{0}' to '{1}'", onRemoveType, realOnRemoveType));
+                  typeEntry.Value.SetAs("onRemoveType", realOnRemoveType);
+                }
                 string realkey = MOD_PREFIX + packageName + "." + typeEntry.Key;
                 bool isCrate;
                 if (typeEntry.Value.TryGetAs<bool>("isCrate", out isCrate) && isCrate) {
