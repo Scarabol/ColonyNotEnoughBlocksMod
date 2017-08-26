@@ -37,7 +37,7 @@ namespace ScarabolMods
         Pipliz.Log.Write(string.Format("Loading translations from package {0}", packageName));
         ModLocalizationHelper.localize(MultiPath.Combine(BlocksDirectory, packageName, "localization"), MOD_PREFIX + packageName + ".", false);
       }
-      // TODO this is realy hacky (maybe better in future ModAPI)
+      // TODO this is really hacky (maybe better in future ModAPI)
       RelativeTexturesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
       RelativeIconsPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "icons", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
       RelativeMeshesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "meshes", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
@@ -75,8 +75,8 @@ namespace ScarabolMods
                     } else {
                       realTextureTypeValue = MultiPath.Combine(relativeTexturesPath, textureType, textureTypeValue);
                     }
+                    Pipliz.Log.Write(string.Format("Rewriting {0} texture path from '{1}' to '{2}'", textureType, textureTypeValue, realTextureTypeValue));
                   }
-                  Pipliz.Log.Write(string.Format("Rewriting {0} texture path from '{1}' to '{2}'", textureType, textureTypeValue, realTextureTypeValue));
                   textureEntry.Value.SetAs(textureType, realTextureTypeValue);
                 }
                 string realkey = MOD_PREFIX + packageName + "." + textureEntry.Key;
