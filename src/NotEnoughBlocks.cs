@@ -29,18 +29,23 @@ namespace ScarabolMods
     {
       ModDirectory = Path.GetDirectoryName(path);
       BlocksDirectory = Path.Combine(ModDirectory, "blocks");
+      // TODO this is really hacky (maybe better in future ModAPI)
+      RelativeTexturesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
+      RelativeIconsPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "icons", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
+      RelativeMeshesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "meshes", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
+      RelativeAudioPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "audio", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
       foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
         string packageName = Path.GetFileName(fullDirPath);
         if (packageName.Equals("examples")) {
           continue;
         }
-        Pipliz.Log.Write(string.Format("Loading translations from package {0}", packageName));
-        ModLocalizationHelper.localize(MultiPath.Combine(BlocksDirectory, packageName, "localization"), MOD_PREFIX + packageName + ".", false);
+        try {
+          Pipliz.Log.Write(string.Format("Loading localizations from package {0}", packageName));
+          ModLocalizationHelper.localize(MultiPath.Combine(BlocksDirectory, packageName, "localization"), MOD_PREFIX + packageName + ".", false);
+        } catch (Exception exception) {
+          Pipliz.Log.WriteError(string.Format("Exception while loading {0} package; {1}", packageName, exception.Message));
+        }
       }
-      // TODO this is really hacky (maybe better in future ModAPI)
-      RelativeTexturesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
-      RelativeIconsPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "textures", "icons", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
-      RelativeMeshesPath = new Uri(MultiPath.Combine(Path.GetFullPath("gamedata"), "meshes", "dummyfile")).MakeRelativeUri(new Uri(BlocksDirectory)).OriginalString;
     }
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterStartup, "scarabol.notenoughblocks.registercallbacks")]
@@ -111,7 +116,7 @@ namespace ScarabolMods
                 if (typeEntry.Value.TryGetAs("mesh", out mesh)) {
                   string realmesh;
                   if (mesh.StartsWith(VANILLA_PREFIX)) {
-                    realmesh = icon.Substring(VANILLA_PREFIX.Length);
+                    realmesh = mesh.Substring(VANILLA_PREFIX.Length);
                   } else {
                     realmesh = MultiPath.Combine(RelativeMeshesPath, packageName, "meshes", mesh);
                   }
@@ -122,7 +127,7 @@ namespace ScarabolMods
                 if (typeEntry.Value.TryGetAs("parentType", out parentType)) {
                   string realParentType;
                   if (parentType.StartsWith(VANILLA_PREFIX)) {
-                    realParentType = mesh.Substring(VANILLA_PREFIX.Length);
+                    realParentType = parentType.Substring(VANILLA_PREFIX.Length);
                   } else {
                     realParentType = MOD_PREFIX + packageName + "." + parentType;
                   }
@@ -161,7 +166,7 @@ namespace ScarabolMods
                 if (typeEntry.Value.TryGetAs("onRemoveType", out onRemoveType)) {
                   string realOnRemoveType;
                   if (onRemoveType.StartsWith(VANILLA_PREFIX)) {
-                    realOnRemoveType = mesh.Substring(VANILLA_PREFIX.Length);
+                    realOnRemoveType = onRemoveType.Substring(VANILLA_PREFIX.Length);
                   } else {
                     realOnRemoveType = MOD_PREFIX + packageName + "." + onRemoveType;
                   }
@@ -170,7 +175,7 @@ namespace ScarabolMods
                 }
                 string realkey = MOD_PREFIX + packageName + "." + typeEntry.Key;
                 bool isCrate;
-                if (typeEntry.Value.TryGetAs<bool>("isCrate", out isCrate) && isCrate) {
+                if (typeEntry.Value.TryGetAs("isCrate", out isCrate) && isCrate) {
                   Pipliz.Log.Write(string.Format("Adding crate type '{0}'", realkey));
                   crateTypeKeys.Add(realkey);
                 } else {
