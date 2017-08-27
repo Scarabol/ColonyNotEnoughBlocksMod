@@ -46,7 +46,7 @@ namespace ScarabolMods
     [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterStartup, "scarabol.notenoughblocks.registercallbacks")]
     public static void AfterStartup()
     {
-      Pipliz.Log.Write("Loaded NotEnoughBlocks Mod 1.5 by Scarabol");
+      Pipliz.Log.Write("Loaded NotEnoughBlocks Mod 1.6 by Scarabol");
     }
 
     [ModLoader.ModCallback(ModLoader.EModCallbackType.AfterAddingBaseTypes, "scarabol.notenoughblocks.addrawtypes")]
