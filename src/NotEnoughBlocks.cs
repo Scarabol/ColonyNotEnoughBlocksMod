@@ -21,6 +21,7 @@ namespace ScarabolMods
     private static string RelativeTexturesPath;
     private static string RelativeIconsPath;
     private static string RelativeMeshesPath;
+    private static string RelativeAudioPath;
     private static List<string> crateTypeKeys = new List<string>();
     private static List<Recipe> playerCraftingRecipes = new List<Recipe>();
 
@@ -42,6 +43,8 @@ namespace ScarabolMods
         try {
           Pipliz.Log.Write(string.Format("Loading localizations from package {0}", packageName));
           ModLocalizationHelper.localize(MultiPath.Combine(BlocksDirectory, packageName, "localization"), MOD_PREFIX + packageName + ".", false);
+          Pipliz.Log.Write(string.Format("Loading audio files from package {0}", packageName));
+          ModAudioHelper.IntegrateAudio(MultiPath.Combine(BlocksDirectory, packageName, "audio"), MOD_PREFIX + packageName + ".", MultiPath.Combine(RelativeAudioPath, packageName, "audio"));
         } catch (Exception exception) {
           Pipliz.Log.WriteError(string.Format("Exception while loading {0} package; {1}", packageName, exception.Message));
         }
@@ -172,6 +175,28 @@ namespace ScarabolMods
                   }
                   Pipliz.Log.Write(string.Format("Rewriting onRemoveType from '{0}' to '{1}'", onRemoveType, realOnRemoveType));
                   typeEntry.Value.SetAs("onRemoveType", realOnRemoveType);
+                }
+                string onPlaceAudio;
+                if (typeEntry.Value.TryGetAs("onPlaceAudio", out onPlaceAudio)) {
+                  string realOnPlaceAudio;
+                  if (onPlaceAudio.StartsWith(VANILLA_PREFIX)) {
+                    realOnPlaceAudio = onPlaceAudio.Substring(VANILLA_PREFIX.Length);
+                  } else {
+                    realOnPlaceAudio = MOD_PREFIX + packageName + "." + onPlaceAudio;
+                  }
+                  Pipliz.Log.Write(string.Format("Rewriting onPlaceAudio from '{0}' to '{1}'", onPlaceAudio, realOnPlaceAudio));
+                  typeEntry.Value.SetAs("onPlaceAudio", realOnPlaceAudio);
+                }
+                string onRemoveAudio;
+                if (typeEntry.Value.TryGetAs("onRemoveAudio", out onRemoveAudio)) {
+                  string realOnRemoveAudio;
+                  if (onRemoveAudio.StartsWith(VANILLA_PREFIX)) {
+                    realOnRemoveAudio = onRemoveAudio.Substring(VANILLA_PREFIX.Length);
+                  } else {
+                    realOnRemoveAudio = MOD_PREFIX + packageName + "." + onRemoveAudio;
+                  }
+                  Pipliz.Log.Write(string.Format("Rewriting onRemoveAudio from '{0}' to '{1}'", onRemoveAudio, realOnRemoveAudio));
+                  typeEntry.Value.SetAs("onRemoveAudio", realOnRemoveAudio);
                 }
                 string realkey = MOD_PREFIX + packageName + "." + typeEntry.Key;
                 bool isCrate;
