@@ -324,7 +324,9 @@ namespace ScarabolMods
           ushort otherIndex;
           if (ItemTypes.IndexLookup.TryGetIndex (otherTypename, out otherIndex)) {
             Vector3Int position = userData.VoxelToChange;
-            ServerManager.TryChangeBlock (position, otherIndex, ServerManager.SetBlockFlags.DefaultAudio);
+            ThreadManager.InvokeOnMainThread (delegate () {
+              ServerManager.TryChangeBlock (position, otherIndex, ServerManager.SetBlockFlags.DefaultAudio);
+            }, 0.1f);
           }
         }
       }
