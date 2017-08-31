@@ -299,32 +299,33 @@ namespace ScarabolMods
     [ModLoader.ModCallback (ModLoader.EModCallbackType.OnTryChangeBlockUser, "scarabol.spawnprotect.trychangeblock")]
     public static bool OnTryChangeBlockUser (ModLoader.OnTryChangeBlockUserData userData)
     {
-      VoxelSide side = userData.voxelHitSide;
-      string suffix;
-      if (side == VoxelSide.xPlus) {
-        suffix = "right";
-      } else if (side == VoxelSide.xMin) {
-        suffix = "left";
-      } else if (side == VoxelSide.yPlus) {
-        suffix = "bottom";
-      } else if (side == VoxelSide.yMin) {
-        suffix = "top";
-      } else if (side == VoxelSide.zPlus) {
-        suffix = "front";
-      } else if (side == VoxelSide.zMin) {
-        suffix = "back";
-      } else {
-        return true;
-      }
-      ushort newType = userData.typeToBuild;
-      string typename;
-      if (newType != userData.typeTillNow && ItemTypes.IndexLookup.TryGetName (newType, out typename)) {
-        string otherTypename = typename + suffix;
-        ushort otherIndex;
-        if (ItemTypes.IndexLookup.TryGetIndex (otherTypename, out otherIndex)) {
-          Vector3Int position = userData.VoxelToChange;
-          ServerManager.TryChangeBlock (position, otherIndex, ServerManager.SetBlockFlags.DefaultAudio);
+      if (!userData.isPrimaryAction) {
+        VoxelSide side = userData.voxelHitSide;
+        string suffix;
+        if (side == VoxelSide.xPlus) {
+          suffix = "right";
+        } else if (side == VoxelSide.xMin) {
+          suffix = "left";
+        } else if (side == VoxelSide.yPlus) {
+          suffix = "bottom";
+        } else if (side == VoxelSide.yMin) {
+          suffix = "top";
+        } else if (side == VoxelSide.zPlus) {
+          suffix = "front";
+        } else if (side == VoxelSide.zMin) {
+          suffix = "back";
+        } else {
           return true;
+        }
+        ushort newType = userData.typeToBuild;
+        string typename;
+        if (newType != userData.typeTillNow && ItemTypes.IndexLookup.TryGetName (newType, out typename)) {
+          string otherTypename = typename + suffix;
+          ushort otherIndex;
+          if (ItemTypes.IndexLookup.TryGetIndex (otherTypename, out otherIndex)) {
+            Vector3Int position = userData.VoxelToChange;
+            ServerManager.TryChangeBlock (position, otherIndex, ServerManager.SetBlockFlags.DefaultAudio);
+          }
         }
       }
       return true;
