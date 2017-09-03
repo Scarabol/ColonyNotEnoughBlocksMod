@@ -296,7 +296,7 @@ namespace ScarabolMods
       RecipePlayer.AllRecipes.AddRange (playerCraftingRecipes);
     }
 
-    [ModLoader.ModCallback (ModLoader.EModCallbackType.OnTryChangeBlockUser, "scarabol.spawnprotect.trychangeblock")]
+    [ModLoader.ModCallback (ModLoader.EModCallbackType.OnTryChangeBlockUser, "scarabol.notenoughblocks.trychangeblock")]
     public static bool OnTryChangeBlockUser (ModLoader.OnTryChangeBlockUserData userData)
     {
       if (!userData.isPrimaryAction) {
