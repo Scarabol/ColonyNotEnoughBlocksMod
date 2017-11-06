@@ -1,6 +1,6 @@
 # important variables
 modname = NotEnoughBlocks
-version = 1.8.0
+version = 2.0
 
 moddir = Scarabol/$(modname)
 zipname = Colony$(modname)Mod-$(version)-mods.zip
