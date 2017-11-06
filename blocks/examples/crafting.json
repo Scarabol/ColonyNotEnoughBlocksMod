@@ -1,17 +1,21 @@
 [
   {
+    "name":"mydirt.recipe",
     "results":[{"type":"mydirt"}],
     "requires":[{"type":"vanilla.planks","amount":2}]
   },
   {
+    "name":"mydirt.recipe2",
     "results":[{"type":"vanilla.stonebricks"}],
     "requires":[{"type":"mydirt","amount":2}]
   },
   {
+    "name":"mystone.recipe",
     "results":[{"type":"mystone"}],
     "requires":[{"type":"vanilla.stonebricks","amount":1}]
   },
   {
+    "name":"mycrate.recipe",
     "results":[{"type":"mycrate"}],
     "requires":[{"type":"vanilla.planks","amount":2}]
   }

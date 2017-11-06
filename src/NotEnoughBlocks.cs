@@ -5,7 +5,6 @@ using Pipliz;
 using Pipliz.Chatting;
 using Pipliz.JSON;
 using Pipliz.Threading;
-using Pipliz.APIProvider.Recipes;
 using Pipliz.APIProvider.Jobs;
 using NPC;
 
@@ -18,23 +17,13 @@ namespace ScarabolMods
     private static string VANILLA_PREFIX = "vanilla.";
     public static string ModDirectory;
     private static string BlocksDirectory;
-    private static string RelativeTexturesPath;
-    private static string RelativeIconsPath;
-    private static string RelativeMeshesPath;
-    private static string RelativeAudioPath;
     private static List<string> crateTypeKeys = new List<string> ();
-    private static List<Recipe> playerCraftingRecipes = new List<Recipe> ();
 
     [ModLoader.ModCallback (ModLoader.EModCallbackType.OnAssemblyLoaded, "scarabol.notenoughblocks.assemblyload")]
     public static void OnAssemblyLoaded (string path)
     {
       ModDirectory = Path.GetDirectoryName (path);
       BlocksDirectory = Path.Combine (ModDirectory, "blocks");
-      // TODO this is really hacky (maybe better in future ModAPI)
-      RelativeTexturesPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "textures", "materials", "blocks", "albedo", "dummyfile")).MakeRelativeUri (new Uri (BlocksDirectory)).OriginalString;
-      RelativeIconsPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "textures", "icons", "dummyfile")).MakeRelativeUri (new Uri (BlocksDirectory)).OriginalString;
-      RelativeMeshesPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "meshes", "dummyfile")).MakeRelativeUri (new Uri (BlocksDirectory)).OriginalString;
-      RelativeAudioPath = new Uri (MultiPath.Combine (Path.GetFullPath ("gamedata"), "audio", "dummyfile")).MakeRelativeUri (new Uri (BlocksDirectory)).OriginalString;
       foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
         string packageName = Path.GetFileName (fullDirPath);
         if (packageName.Equals ("examples")) {
@@ -43,8 +32,6 @@ namespace ScarabolMods
         try {
           Pipliz.Log.Write (string.Format ("Loading localizations from package {0}", packageName));
           ModLocalizationHelper.localize (MultiPath.Combine (BlocksDirectory, packageName, "localization"), MOD_PREFIX + packageName + ".", false);
-          Pipliz.Log.Write (string.Format ("Loading audio files from package {0}", packageName));
-          ModAudioHelper.IntegrateAudio (MultiPath.Combine (BlocksDirectory, packageName, "audio"), MOD_PREFIX + packageName + ".", MultiPath.Combine (RelativeAudioPath, packageName, "audio"));
         } catch (Exception exception) {
           Pipliz.Log.WriteError (string.Format ("Exception while loading {0} package; {1}", packageName, exception.Message));
         }
@@ -58,7 +45,7 @@ namespace ScarabolMods
     }
 
     [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterAddingBaseTypes, "scarabol.notenoughblocks.addrawtypes")]
-    public static void AfterAddingBaseTypes ()
+    public static void AfterAddingBaseTypes (Dictionary<string, ItemTypesServer.ItemTypeRaw> itemTypes)
     {
       foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
         string packageName = Path.GetFileName (fullDirPath);
@@ -66,7 +53,7 @@ namespace ScarabolMods
           continue;
         }
         Pipliz.Log.Write (string.Format ("Loading blocks from package {0}", packageName));
-        string relativeTexturesPath = MultiPath.Combine (RelativeTexturesPath, packageName, "textures");
+        string relativeTexturesPath = MultiPath.Combine (BlocksDirectory, packageName, "textures");
         Pipliz.Log.Write (string.Format ("relative textures path is {0}", relativeTexturesPath));
         Pipliz.Log.Write (string.Format ("Started loading '{0}' texture mappings...", packageName));
         JSONNode jsonTextureMapping;
@@ -89,7 +76,7 @@ namespace ScarabolMods
                 }
                 string realkey = MOD_PREFIX + packageName + "." + textureEntry.Key;
                 Pipliz.Log.Write (string.Format ("Adding texture mapping for '{0}'", realkey));
-                ItemTypesServer.AddTextureMapping (realkey, textureEntry.Value);
+                ItemTypesServer.SetTextureMapping (realkey, new ItemTypesServer.TextureMapping (textureEntry.Value));
               } catch (Exception exception) {
                 Pipliz.Log.WriteError (string.Format ("Exception while loading from {0}; {1}", "texturemapping.json", exception.Message));
               }
@@ -110,7 +97,7 @@ namespace ScarabolMods
                   if (icon.StartsWith (VANILLA_PREFIX)) {
                     realicon = icon.Substring (VANILLA_PREFIX.Length);
                   } else {
-                    realicon = MultiPath.Combine (RelativeIconsPath, packageName, "icons", icon);
+                    realicon = MultiPath.Combine (BlocksDirectory, packageName, "icons", icon);
                   }
                   Pipliz.Log.Write (string.Format ("Rewriting icon path from '{0}' to '{1}'", icon, realicon));
                   typeEntry.Value.SetAs ("icon", realicon);
@@ -121,7 +108,7 @@ namespace ScarabolMods
                   if (mesh.StartsWith (VANILLA_PREFIX)) {
                     realmesh = mesh.Substring (VANILLA_PREFIX.Length);
                   } else {
-                    realmesh = MultiPath.Combine (RelativeMeshesPath, packageName, "meshes", mesh);
+                    realmesh = MultiPath.Combine (BlocksDirectory, packageName, "meshes", mesh);
                   }
                   Pipliz.Log.Write (string.Format ("Rewriting mesh path from '{0}' to '{1}'", mesh, realmesh));
                   typeEntry.Value.SetAs ("mesh", realmesh);
@@ -206,7 +193,7 @@ namespace ScarabolMods
                 } else {
                   Pipliz.Log.Write (string.Format ("Adding block type '{0}'", realkey));
                 }
-                ItemTypes.AddRawType (realkey, typeEntry.Value);
+                itemTypes.Add (realkey, new ItemTypesServer.ItemTypeRaw (realkey, typeEntry.Value));
               } catch (Exception exception) {
                 Pipliz.Log.WriteException (exception);
                 Pipliz.Log.WriteError (string.Format ("Exception while loading block type {0}; {1}", typeEntry.Key, exception.Message));
@@ -220,9 +207,8 @@ namespace ScarabolMods
     }
 
     [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterItemTypesDefined, "scarabol.notenoughblocks.loadrecipes")]
-    [ModLoader.ModCallbackDependsOn ("pipliz.blocknpcs.loadrecipes")]
     [ModLoader.ModCallbackProvidesFor ("pipliz.apiprovider.registerrecipes")]
-    public static void AfterItemTypesDefined ()
+    public static void LoadRecipes ()
     {
       foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
         string packageName = Path.GetFileName (fullDirPath);
@@ -232,14 +218,14 @@ namespace ScarabolMods
         Pipliz.Log.Write (string.Format ("Started loading '{0}' recipes...", packageName));
         try {
           foreach (string[] jobAndFilename in new string[][] {
-            new string[] { "pipliz.crafter", "crafting.json"},
-            new string[] { "pipliz.tailor", "tailoring.json" },
-            new string[] { "pipliz.grinder", "grinding.json" },
-            new string[] { "pipliz.minter", "minting.json" },
-            new string[] { "pipliz.merchant", "shopping.json" },
-            new string[] { "pipliz.technologist", "technologist.json" },
-            new string[] { "pipliz.smelter", "smelting.json" },
-            new string[] { "pipliz.baker", "baking.json" }
+            new string[] { "workbench", "crafting.json"},
+            new string[] { "tailorshop", "tailoring.json" },
+            new string[] { "grindstone", "grinding.json" },
+            new string[] { "mint", "minting.json" },
+            new string[] { "shop", "shopping.json" },
+            new string[] { "technologisttable", "technologist.json" },
+            new string[] { "furnace", "smelting.json" },
+            new string[] { "oven", "baking.json" }
           }) {
             JSONNode jsonRecipes;
             if (Pipliz.JSON.JSON.Deserialize (MultiPath.Combine (BlocksDirectory, packageName, jobAndFilename [1]), out jsonRecipes, false)) {
@@ -259,14 +245,11 @@ namespace ScarabolMods
                       jsonRecipePart.SetAs ("type", realtype);
                     }
                   }
-                  if (jobAndFilename [0].Equals ("pipliz.smelter") || jobAndFilename [0].Equals ("pipliz.baker")) {
-                    RecipeManager.AddRecipesFueled (jobAndFilename [0], new List<RecipeFueled> () { new RecipeFueled (craftingEntry) });
-                  } else {
-                    Recipe craftingRecipe = new Recipe (craftingEntry);
-                    if (jobAndFilename [1].Equals ("crafting.json")) {
-                      playerCraftingRecipes.Add (craftingRecipe);
-                    }
-                    RecipeManager.AddRecipes (jobAndFilename [0], new List<Recipe> () { craftingRecipe });
+                  Recipe craftingRecipe = new Recipe (craftingEntry);
+                  RecipeStorage.AddRecipe (craftingRecipe);
+                  RecipeStorage.AddBlockToRecipeMapping (jobAndFilename [0], craftingRecipe.Name);
+                  if (jobAndFilename [1].Equals ("crafting.json")) {
+                    RecipePlayer.AddDefaultRecipe (craftingRecipe);
                   }
                 }
               } else {
@@ -280,20 +263,13 @@ namespace ScarabolMods
       }
     }
 
-    [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterItemTypesServer, "scarabol.notenoughblocks.registertypes")]
-    public static void AfterItemTypesServer ()
+    [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterItemTypesDefined, "scarabol.notenoughblocks.registertypes")]
+    public static void AfterItemTypesDefined ()
     {
       foreach (string typekey in crateTypeKeys) {
         ItemTypesServer.RegisterOnAdd (typekey, StockpileBlockTracker.Add);
         ItemTypesServer.RegisterOnRemove (typekey, StockpileBlockTracker.Remove);
       }
-    }
-
-    [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterWorldLoad, "scarabol.notenoughblocks.addplayercrafts")]
-    public static void AfterWorldLoad ()
-    {
-      // add recipes here, otherwise they're inserted before vanilla recipes in player crafts
-      RecipePlayer.AllRecipes.AddRange (playerCraftingRecipes);
     }
 
     [ModLoader.ModCallback (ModLoader.EModCallbackType.OnTryChangeBlockUser, "scarabol.notenoughblocks.trychangeblock")]
