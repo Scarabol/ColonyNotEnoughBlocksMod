@@ -95,7 +95,7 @@ namespace ScarabolMods
                 if (typeEntry.Value.TryGetAs ("icon", out icon)) {
                   string realicon;
                   if (icon.StartsWith (VANILLA_PREFIX)) {
-                    realicon = icon.Substring (VANILLA_PREFIX.Length);
+                    realicon = MultiPath.Combine ("gamedata", "textures", "icons", icon.Substring (VANILLA_PREFIX.Length));
                   } else {
                     realicon = MultiPath.Combine (BlocksDirectory, packageName, "icons", icon);
                   }
