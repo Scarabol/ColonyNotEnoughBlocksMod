@@ -53,8 +53,6 @@ namespace ScarabolMods
           continue;
         }
         Pipliz.Log.Write (string.Format ("Loading blocks from package {0}", packageName));
-        string relativeTexturesPath = MultiPath.Combine (BlocksDirectory, packageName, "textures");
-        Pipliz.Log.Write (string.Format ("relative textures path is {0}", relativeTexturesPath));
         Pipliz.Log.Write (string.Format ("Started loading '{0}' texture mappings...", packageName));
         JSONNode jsonTextureMapping;
         if (Pipliz.JSON.JSON.Deserialize (MultiPath.Combine (BlocksDirectory, packageName, "texturemapping.json"), out jsonTextureMapping, false)) {
@@ -68,7 +66,7 @@ namespace ScarabolMods
                     if (textureTypeValue.StartsWith (VANILLA_PREFIX)) {
                       realTextureTypeValue = realTextureTypeValue.Substring (VANILLA_PREFIX.Length);
                     } else {
-                      realTextureTypeValue = MultiPath.Combine (relativeTexturesPath, textureType, textureTypeValue);
+                      realTextureTypeValue = MultiPath.Combine (BlocksDirectory, packageName, "textures", textureType, textureTypeValue);
                     }
                     Pipliz.Log.Write (string.Format ("Rewriting {0} texture path from '{1}' to '{2}'", textureType, textureTypeValue, realTextureTypeValue));
                   }

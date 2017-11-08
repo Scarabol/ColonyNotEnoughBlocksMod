@@ -4,24 +4,24 @@
     "isFertile" : true,
     "icon" : "mydirt.png",
     "sideall" : "mydirt",
-    "onRemoveAudio" : "grassDelete",
-    "onPlaceAudio" : "dirtPlace",
+    "onRemoveAudio" : "vanilla.grassDelete",
+    "onPlaceAudio" : "vanilla.dirtPlace",
     "maxStackSize" : 10,
     "onRemoveType" : "mystone"
   },
   "mystone" : {
     "npcLimit" : 0,
     "icon" : "vanilla.stonebricks.png",
-    "sideall" : "SELF",
-    "onRemoveAudio" : "stonePlace",
-    "onPlaceAudio" : "stoneDelete",
+    "sideall" : "mystone",
+    "onRemoveAudio" : "vanilla.stonePlace",
+    "onPlaceAudio" : "vanilla.stoneDelete",
     "maxStackSize" : 20
   },
   "mycrate" : {
-		"sideall" : "crate",
+		"sideall" : "vanilla.crate",
 		"icon" : "vanilla.crate.png",
-		"onRemoveAudio" : "woodDeleteLight",
-		"onPlaceAudio" : "woodPlace",
+		"onRemoveAudio" : "vanilla.woodDeleteLight",
+		"onPlaceAudio" : "vanilla.woodPlace",
 		"npcLimit" : 0,
     "isCrate" : true
   }
