@@ -1,0 +1,12 @@
+{
+  "types": {
+    "mydirt" : "Ma terre",
+    "mystone" : "Une pierre",
+    "mycrate" : "La caisse de Schrödingers, le chat est mort ou viant? Peut-être les deux !"
+  },
+  "typeuses" : {
+    "mydirt" : "Ca ressemble à de la terre venant de l'espace",
+  "mystone" : "C'est juste une pierre",
+  "mycrate" : "Que va-t'on y trouver ?"
+  }
+}

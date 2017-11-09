@@ -24,18 +24,6 @@ namespace ScarabolMods
     {
       ModDirectory = Path.GetDirectoryName (path);
       BlocksDirectory = Path.Combine (ModDirectory, "blocks");
-      foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
-        string packageName = Path.GetFileName (fullDirPath);
-        if (packageName.Equals ("examples")) {
-          continue;
-        }
-        try {
-          Pipliz.Log.Write (string.Format ("Loading localizations from package {0}", packageName));
-          ModLocalizationHelper.localize (MultiPath.Combine (BlocksDirectory, packageName, "localization"), MOD_PREFIX + packageName + ".", false);
-        } catch (Exception exception) {
-          Pipliz.Log.WriteError (string.Format ("Exception while loading {0} package; {1}", packageName, exception.Message));
-        }
-      }
     }
 
     [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterStartup, "scarabol.notenoughblocks.registercallbacks")]
@@ -267,6 +255,25 @@ namespace ScarabolMods
       foreach (string typekey in crateTypeKeys) {
         ItemTypesServer.RegisterOnAdd (typekey, StockpileBlockTracker.Add);
         ItemTypesServer.RegisterOnRemove (typekey, StockpileBlockTracker.Remove);
+      }
+    }
+
+    [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterWorldLoad, "scarabol.notenoughblocks.afterworldload")]
+    [ModLoader.ModCallbackDependsOn ("pipliz.server.localization.waitforloading")]
+    [ModLoader.ModCallbackProvidesFor ("pipliz.server.localization.convert")]
+    public static void AfterWorldLoad ()
+    {
+      foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
+        string packageName = Path.GetFileName (fullDirPath);
+        if (packageName.Equals ("examples")) {
+          continue;
+        }
+        try {
+          Pipliz.Log.Write (string.Format ("Loading localizations from package {0}", packageName));
+          ModLocalizationHelper.localize (MultiPath.Combine (BlocksDirectory, packageName, "localization"), MOD_PREFIX + packageName + ".");
+        } catch (Exception exception) {
+          Pipliz.Log.WriteError (string.Format ("Exception while loading {0} package; {1}", packageName, exception.Message));
+        }
       }
     }
 

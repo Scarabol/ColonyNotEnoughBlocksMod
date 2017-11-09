@@ -1,0 +1,12 @@
+{
+  "types": {
+    "mydirt" : "Mein Dreck",
+    "mystone" : "Ein Stein",
+    "mycrate" : "Schrödingers Kiste"
+  },
+  "typeuses" : {
+    "mydirt" : "Sieht aus wie Aliendreck",
+    "mystone" : "Es ist nur ein Stein",
+    "mycrate" : "Die Items sind in der Kiste und auch nicht"
+  }
+}
