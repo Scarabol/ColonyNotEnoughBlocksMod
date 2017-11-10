@@ -32,21 +32,25 @@ namespace ScarabolMods
       Pipliz.Log.Write ("Loaded NotEnoughBlocks Mod 2.2 by Scarabol");
     }
 
-    [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterAddingBaseTypes, "scarabol.notenoughblocks.addrawtypes")]
-    public static void AfterAddingBaseTypes (Dictionary<string, ItemTypesServer.ItemTypeRaw> itemTypes)
+    [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterSelectedWorld, "scarabol.notenoughblocks.registertexturemappings")]
+    [ModLoader.ModCallbackProvidesFor ("pipliz.server.registertexturemappingtextures")]
+    public static void AfterSelectedWorld ()
     {
       foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
         string packageName = Path.GetFileName (fullDirPath);
         if (packageName.Equals ("examples")) {
           continue;
         }
-        Pipliz.Log.Write (string.Format ("Loading blocks from package {0}", packageName));
         Pipliz.Log.Write (string.Format ("Started loading '{0}' texture mappings...", packageName));
         JSONNode jsonTextureMapping;
         if (Pipliz.JSON.JSON.Deserialize (MultiPath.Combine (BlocksDirectory, packageName, "texturemapping.json"), out jsonTextureMapping, false)) {
           if (jsonTextureMapping.NodeType == NodeType.Object) {
             foreach (KeyValuePair<string,JSONNode> textureEntry in jsonTextureMapping.LoopObject()) {
               try {
+                string albedoPath = null;
+                string normalPath = null;
+                string emissivePath = null;
+                string heightPath = null;
                 foreach (string textureType in new string[] { "albedo", "normal", "emissive", "height" }) {
                   string textureTypeValue = textureEntry.Value.GetAs<string> (textureType);
                   string realTextureTypeValue = textureTypeValue;
@@ -54,15 +58,37 @@ namespace ScarabolMods
                     if (textureTypeValue.StartsWith (VANILLA_PREFIX)) {
                       realTextureTypeValue = realTextureTypeValue.Substring (VANILLA_PREFIX.Length);
                     } else {
-                      realTextureTypeValue = MultiPath.Combine (BlocksDirectory, packageName, "textures", textureType, textureTypeValue);
+                      realTextureTypeValue = MultiPath.Combine (BlocksDirectory, packageName, "textures", textureType, textureTypeValue + ".png");
+                      if (textureType.Equals ("albedo")) {
+                        albedoPath = realTextureTypeValue;
+                      } else if (textureType.Equals ("normal")) {
+                        normalPath = realTextureTypeValue;
+                      } else if (textureType.Equals ("emissive")) {
+                        emissivePath = realTextureTypeValue;
+                      } else if (textureType.Equals ("height")) {
+                        heightPath = realTextureTypeValue;
+                      }
                     }
                     Pipliz.Log.Write (string.Format ("Rewriting {0} texture path from '{1}' to '{2}'", textureType, textureTypeValue, realTextureTypeValue));
                   }
                   textureEntry.Value.SetAs (textureType, realTextureTypeValue);
                 }
+                var textureMapping = new ItemTypesServer.TextureMapping (textureEntry.Value);
+                if (albedoPath != null) {
+                  textureMapping.AlbedoPath = albedoPath;
+                }
+                if (normalPath != null) {
+                  textureMapping.NormalPath = normalPath;
+                }
+                if (emissivePath != null) {
+                  textureMapping.EmissivePath = emissivePath;
+                }
+                if (heightPath != null) {
+                  textureMapping.HeightPath = heightPath;
+                }
                 string realkey = MOD_PREFIX + packageName + "." + textureEntry.Key;
                 Pipliz.Log.Write (string.Format ("Adding texture mapping for '{0}'", realkey));
-                ItemTypesServer.SetTextureMapping (realkey, new ItemTypesServer.TextureMapping (textureEntry.Value));
+                ItemTypesServer.SetTextureMapping (realkey, textureMapping);
               } catch (Exception exception) {
                 Pipliz.Log.WriteError (string.Format ("Exception while loading from {0}; {1}", "texturemapping.json", exception.Message));
               }
@@ -70,6 +96,17 @@ namespace ScarabolMods
           } else {
             Pipliz.Log.WriteError (string.Format ("Expected json object in {0}, but got {1} instead", "texturemapping.json", jsonTextureMapping.NodeType));
           }
+        }
+      }
+    }
+
+    [ModLoader.ModCallback (ModLoader.EModCallbackType.AfterAddingBaseTypes, "scarabol.notenoughblocks.addrawtypes")]
+    public static void AfterAddingBaseTypes (Dictionary<string, ItemTypesServer.ItemTypeRaw> itemTypes)
+    {
+      foreach (string fullDirPath in Directory.GetDirectories(BlocksDirectory)) {
+        string packageName = Path.GetFileName (fullDirPath);
+        if (packageName.Equals ("examples")) {
+          continue;
         }
         Pipliz.Log.Write (string.Format ("Started loading '{0}' types...", packageName));
         JSONNode jsonTypes;
